@@ -29,7 +29,7 @@ This iOS app displays the top 20 StackOverflow users, showing their profile imag
 ## Installation
 1. Clone the repository:
    ```sh
-   git clone <your-repo-url>
+   git clone https://github.com/zip520123/StackOverflowUsers
    ```
 2. Open `StackOverflowUsers.xcodeproj` in Xcode.
 3. Build and run the app on the simulator or a device.
