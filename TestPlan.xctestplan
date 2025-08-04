@@ -12,7 +12,13 @@
     "testTimeoutsEnabled" : true
   },
   "testTargets" : [
-
+    {
+      "target" : {
+        "containerPath" : "container:StackOverflowUsers.xcodeproj",
+        "identifier" : "8F9098062E4118E5003E0D46",
+        "name" : "StackOverflowUsersTests"
+      }
+    }
   ],
   "version" : 1
 }
