@@ -20,16 +20,16 @@ class UserTableViewCell: UITableViewCell {
     
     private func setupUI() {
         profileImageView.translatesAutoresizingMaskIntoConstraints = false
-        profileImageView.layer.cornerRadius = 24
+        profileImageView.layer.cornerRadius = 32
         profileImageView.clipsToBounds = true
         profileImageView.contentMode = .scaleAspectFill
         contentView.addSubview(profileImageView)
         
-        nameLabel.font = UIFont.boldSystemFont(ofSize: 16)
+        nameLabel.font = UIFont.boldSystemFont(ofSize: 18)
         nameLabel.translatesAutoresizingMaskIntoConstraints = false
         contentView.addSubview(nameLabel)
         
-        reputationLabel.font = UIFont.systemFont(ofSize: 14)
+        reputationLabel.font = UIFont.systemFont(ofSize: 16)
         reputationLabel.textColor = .gray
         reputationLabel.translatesAutoresizingMaskIntoConstraints = false
         contentView.addSubview(reputationLabel)
@@ -46,15 +46,15 @@ class UserTableViewCell: UITableViewCell {
         NSLayoutConstraint.activate([
             profileImageView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
             profileImageView.centerYAnchor.constraint(equalTo: contentView.centerYAnchor),
-            profileImageView.widthAnchor.constraint(equalToConstant: 48),
-            profileImageView.heightAnchor.constraint(equalToConstant: 48),
+            profileImageView.widthAnchor.constraint(equalToConstant: 64),
+            profileImageView.heightAnchor.constraint(equalToConstant: 64),
             
             nameLabel.leadingAnchor.constraint(equalTo: profileImageView.trailingAnchor, constant: 16),
-            nameLabel.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 16),
+            nameLabel.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 24),
             nameLabel.trailingAnchor.constraint(lessThanOrEqualTo: followButton.leadingAnchor, constant: -8),
             
             reputationLabel.leadingAnchor.constraint(equalTo: nameLabel.leadingAnchor),
-            reputationLabel.topAnchor.constraint(equalTo: nameLabel.bottomAnchor, constant: 4),
+            reputationLabel.topAnchor.constraint(equalTo: nameLabel.bottomAnchor, constant: 8),
             reputationLabel.trailingAnchor.constraint(lessThanOrEqualTo: followButton.leadingAnchor, constant: -8),
             
             followButton.centerYAnchor.constraint(equalTo: contentView.centerYAnchor),
@@ -62,8 +62,10 @@ class UserTableViewCell: UITableViewCell {
             
             followedIndicator.trailingAnchor.constraint(equalTo: followButton.leadingAnchor, constant: -8),
             followedIndicator.centerYAnchor.constraint(equalTo: contentView.centerYAnchor),
-            followedIndicator.widthAnchor.constraint(equalToConstant: 20),
-            followedIndicator.heightAnchor.constraint(equalToConstant: 20)
+            followedIndicator.widthAnchor.constraint(equalToConstant: 24),
+            followedIndicator.heightAnchor.constraint(equalToConstant: 24),
+            
+            contentView.heightAnchor.constraint(greaterThanOrEqualToConstant: 96)
         ])
     }
     
