@@ -8,6 +8,7 @@ class UserTableViewCell: UITableViewCell {
     private let followedIndicator = UIImageView()
     
     var followAction: (() -> Void)?
+    private var currentImageURL: URL?
     
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
@@ -75,8 +76,10 @@ class UserTableViewCell: UITableViewCell {
         followButton.setTitle(isFollowing ? "Unfollow" : "Follow", for: .normal)
         followedIndicator.isHidden = !isFollowing
         if let urlString = user.profile_image, let url = URL(string: urlString) {
+            currentImageURL = url
             loadImage(from: url)
         } else {
+            currentImageURL = nil
             profileImageView.image = UIImage(systemName: "person.crop.circle")
         }
     }
@@ -87,9 +90,12 @@ class UserTableViewCell: UITableViewCell {
     
     private func loadImage(from url: URL) {
         URLSession.shared.dataTask(with: url) { [weak self] data, _, _ in
+            guard let self = self else { return }
             guard let data = data, let image = UIImage(data: data) else { return }
             DispatchQueue.main.async {
-                self?.profileImageView.image = image
+                if self.currentImageURL == url {
+                    self.profileImageView.image = image
+                }
             }
         }.resume()
     }
