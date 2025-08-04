@@ -5,7 +5,7 @@ protocol Coordinator {
 }
 
 class AppCoordinator: Coordinator {
-    var navigationController: UINavigationController
+    let navigationController: UINavigationController
     
     init(navigationController: UINavigationController) {
         self.navigationController = navigationController
