@@ -33,29 +33,29 @@ class UsersListViewModelTests: XCTestCase {
         let mockFollow = MockFollowManager()
         let user = User(user_id: 1, display_name: "Test", reputation: 100, profile_image: nil)
         mockNetwork.result = .success([user])
-        let viewModel = UsersListViewModel(networkService: mockNetwork, followManager: mockFollow)
+        let sut = UsersListViewModel(networkService: mockNetwork, followManager: mockFollow)
         let exp = expectation(description: "Users updated")
 
         let delegate = Delegate(exp: exp)
-        viewModel.delegate = delegate
-        viewModel.fetchUsers()
+        sut.delegate = delegate
+        sut.fetchUsers()
         waitForExpectations(timeout: 1)
-        XCTAssertEqual(viewModel.users.count, 1)
-        XCTAssertEqual(viewModel.users[0].display_name, "Test")
+        XCTAssertEqual(sut.users.count, 1)
+        XCTAssertEqual(sut.users[0].display_name, "Test")
     }
 
     func testFetchUsersFailure() {
         let mockNetwork = MockNetworkService()
         let mockFollow = MockFollowManager()
         mockNetwork.result = .failure(NSError(domain: "Test", code: 1))
-        let viewModel = UsersListViewModel(networkService: mockNetwork, followManager: mockFollow)
+        let sut = UsersListViewModel(networkService: mockNetwork, followManager: mockFollow)
         let exp = expectation(description: "Error")
 
         let delegate = Delegate(exp: exp)
-        viewModel.delegate = delegate
-        viewModel.fetchUsers()
+        sut.delegate = delegate
+        sut.fetchUsers()
         waitForExpectations(timeout: 1)
-        XCTAssertEqual(viewModel.users.count, 0)
+        XCTAssertEqual(sut.users.count, 0)
     }
 
     func testFollowUnfollow() {
@@ -63,12 +63,12 @@ class UsersListViewModelTests: XCTestCase {
         let mockFollow = MockFollowManager()
         let user = User(user_id: 1, display_name: "Test", reputation: 100, profile_image: nil)
         mockNetwork.result = .success([user])
-        let viewModel = UsersListViewModel(networkService: mockNetwork, followManager: mockFollow)
+        let sut = UsersListViewModel(networkService: mockNetwork, followManager: mockFollow)
         
-        XCTAssertFalse(viewModel.isFollowing(user: user))
-        viewModel.follow(user: user)
-        XCTAssertTrue(viewModel.isFollowing(user: user))
-        viewModel.unfollow(user: user)
-        XCTAssertFalse(viewModel.isFollowing(user: user))
+        XCTAssertFalse(sut.isFollowing(user: user))
+        sut.follow(user: user)
+        XCTAssertTrue(sut.isFollowing(user: user))
+        sut.unfollow(user: user)
+        XCTAssertFalse(sut.isFollowing(user: user))
     }
 }
