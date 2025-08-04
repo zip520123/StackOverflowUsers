@@ -1,0 +1,21 @@
+import UIKit
+
+protocol Coordinator {
+    var navigationController: UINavigationController { get set }
+    func start()
+}
+
+class AppCoordinator: Coordinator {
+    var navigationController: UINavigationController
+    
+    init(navigationController: UINavigationController) {
+        self.navigationController = navigationController
+    }
+    
+    func start() {
+        let networkService = NetworkService()
+        let viewModel = UsersListViewModel(networkService: networkService, followManager: UserDefaultsFollowManager())
+        let usersVC = UsersListViewController(viewModel: viewModel)
+        navigationController.viewControllers = [usersVC]
+    }
+}
