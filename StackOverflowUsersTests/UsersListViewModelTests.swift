@@ -19,12 +19,10 @@ class MockFollowManager: FollowManagerProtocol {
 }
 
 class UsersListViewModelTests: XCTestCase {
+
     func testFetchUsersSuccess() {
-        let mockNetwork = MockNetworkService()
-        let mockFollow = MockFollowManager()
         let user = User(user_id: 1, display_name: "Test", reputation: 100, profile_image: nil)
-        mockNetwork.result = .success([user])
-        let sut = UsersListViewModel(networkService: mockNetwork, followManager: mockFollow)
+        let (sut, _, _) = makeSUT(networkResult: .success([user]))
         let exp = expectation(description: "Users updated")
         sut.onUsersUpdated = {
             exp.fulfill()
@@ -33,15 +31,10 @@ class UsersListViewModelTests: XCTestCase {
         waitForExpectations(timeout: 1)
         XCTAssertEqual(sut.users.count, 1)
         XCTAssertEqual(sut.users[0].display_name, "Test")
-        
-        trackForMemoryLeaks(sut)
     }
 
     func testFetchUsersFailure() {
-        let mockNetwork = MockNetworkService()
-        let mockFollow = MockFollowManager()
-        mockNetwork.result = .failure(NSError(domain: "Test", code: 1))
-        let sut = UsersListViewModel(networkService: mockNetwork, followManager: mockFollow)
+        let (sut, _, _) = makeSUT(networkResult: .failure(NSError(domain: "Test", code: 1)))
         let exp = expectation(description: "Error")
         sut.onError = { error in
             exp.fulfill()
@@ -49,21 +42,28 @@ class UsersListViewModelTests: XCTestCase {
         sut.fetchUsers()
         waitForExpectations(timeout: 1)
         XCTAssertEqual(sut.users.count, 0)
-        trackForMemoryLeaks(sut)
     }
 
     func testFollowUnfollow() {
-        let mockNetwork = MockNetworkService()
-        let mockFollow = MockFollowManager()
+        let (sut, _, _) = makeSUT()
         let user = User(user_id: 1, display_name: "Test", reputation: 100, profile_image: nil)
-        let sut = UsersListViewModel(networkService: mockNetwork, followManager: mockFollow)
 
         XCTAssertFalse(sut.isFollowing(user: user))
         sut.follow(user: user)
         XCTAssertTrue(sut.isFollowing(user: user))
         sut.unfollow(user: user)
         XCTAssertFalse(sut.isFollowing(user: user))
-        trackForMemoryLeaks(sut)
+    }
+    
+    func makeSUT(networkResult: Result<[User], Error>? = nil, file: StaticString = #filePath, line: UInt = #line) -> (sut: UsersListViewModel, mockNetwork: MockNetworkService, mockFollow: MockFollowManager) {
+        let mockNetwork = MockNetworkService()
+        let mockFollow = MockFollowManager()
+        mockNetwork.result = networkResult
+        let sut = UsersListViewModel(networkService: mockNetwork, followManager: mockFollow)
+        trackForMemoryLeaks(sut, file: file, line: line)
+        trackForMemoryLeaks(mockNetwork, file: file, line: line)
+        trackForMemoryLeaks(mockFollow, file: file, line: line)
+        return (sut, mockNetwork, mockFollow)
     }
 }
 
