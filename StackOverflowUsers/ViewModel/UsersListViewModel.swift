@@ -23,17 +23,15 @@ class UsersListViewModel {
     func fetchUsers() {
         isLoading = true
         networkService.fetchTopUsers { [weak self] result in
-            DispatchQueue.main.async {
-                self?.isLoading = false
-                switch result {
-                case .success(let users):
-                    self?.users = users
-                    self?.delegate?.didUpdateUsers()
-                case .failure(let error):
-                    self?.error = error
-                    self?.users = []
-                    self?.delegate?.didFailWithError(error)
-                }
+            self?.isLoading = false
+            switch result {
+            case .success(let users):
+                self?.users = users
+                self?.delegate?.didUpdateUsers()
+            case .failure(let error):
+                self?.error = error
+                self?.users = []
+                self?.delegate?.didFailWithError(error)
             }
         }
     }

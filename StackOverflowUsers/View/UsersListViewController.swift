@@ -83,11 +83,15 @@ extension UsersListViewController: UITableViewDataSource, UITableViewDelegate {
 
 extension UsersListViewController: UsersListViewModelDelegate {
     func didUpdateUsers() {
-        hideError()
-        tableView.reloadData()
+        DispatchQueue.main.async { [weak self] in
+            self?.hideError()
+            self?.tableView.reloadData()
+        }
     }
     
     func didFailWithError(_ error: Error) {
-        showError("Failed to load users. Please try again.")
+        DispatchQueue.main.async { [weak self] in
+            self?.showError("Failed to load users. Please try again.")
+        }
     }
 }

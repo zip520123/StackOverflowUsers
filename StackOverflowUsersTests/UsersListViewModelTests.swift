@@ -2,11 +2,9 @@ import XCTest
 @testable import StackOverflowUsers
 
 class MockNetworkService: NetworkServiceProtocol {
-    var result: Result<[User], Error>?
+    private(set) var requests: [(Result<[User], Error>) -> Void] = []
     func fetchTopUsers(completion: @escaping (Result<[User], Error>) -> Void) {
-        if let result = result {
-            completion(result)
-        }
+        requests.append(completion)
     }
 }
 
@@ -21,10 +19,10 @@ class MockFollowManager: FollowManagerProtocol {
 class UsersListViewModelTests: XCTestCase {
     
     class Delegate: UsersListViewModelDelegate {
-        let exp: XCTestExpectation
-        init(exp: XCTestExpectation) { self.exp = exp }
-        func didUpdateUsers() { exp.fulfill() }
-        func didFailWithError(_ error: Error) { XCTFail() }
+        private(set) var didUpdateUsersCallCounts = 0
+        private(set) var didFailWithErrorCallCounts = 0
+        func didUpdateUsers() { didUpdateUsersCallCounts += 1 }
+        func didFailWithError(_ error: Error) { didFailWithErrorCallCounts += 1 }
     }
     
     
@@ -32,14 +30,20 @@ class UsersListViewModelTests: XCTestCase {
         let mockNetwork = MockNetworkService()
         let mockFollow = MockFollowManager()
         let user = User(user_id: 1, display_name: "Test", reputation: 100, profile_image: nil)
-        mockNetwork.result = .success([user])
-        let sut = UsersListViewModel(networkService: mockNetwork, followManager: mockFollow)
-        let exp = expectation(description: "Users updated")
 
-        let delegate = Delegate(exp: exp)
+        let sut = UsersListViewModel(networkService: mockNetwork, followManager: mockFollow)
+
+        
+        let delegate = Delegate()
         sut.delegate = delegate
+        XCTAssertEqual(mockNetwork.requests.count, 0)
         sut.fetchUsers()
-        waitForExpectations(timeout: 1)
+        XCTAssertEqual(mockNetwork.requests.count, 1)
+        
+        XCTAssertEqual(delegate.didUpdateUsersCallCounts, 0)
+        mockNetwork.requests[0](.success([user]))
+        XCTAssertEqual(delegate.didUpdateUsersCallCounts, 1)
+        
         XCTAssertEqual(sut.users.count, 1)
         XCTAssertEqual(sut.users[0].display_name, "Test")
     }
@@ -47,14 +51,19 @@ class UsersListViewModelTests: XCTestCase {
     func testFetchUsersFailure() {
         let mockNetwork = MockNetworkService()
         let mockFollow = MockFollowManager()
-        mockNetwork.result = .failure(NSError(domain: "Test", code: 1))
-        let sut = UsersListViewModel(networkService: mockNetwork, followManager: mockFollow)
-        let exp = expectation(description: "Error")
 
-        let delegate = Delegate(exp: exp)
+        let sut = UsersListViewModel(networkService: mockNetwork, followManager: mockFollow)
+
+        let delegate = Delegate()
         sut.delegate = delegate
+        XCTAssertEqual(mockNetwork.requests.count, 0)
         sut.fetchUsers()
-        waitForExpectations(timeout: 1)
+        XCTAssertEqual(mockNetwork.requests.count, 1)
+        
+        XCTAssertEqual(delegate.didFailWithErrorCallCounts, 0)
+        mockNetwork.requests[0](.failure(NSError(domain: "", code: 0)))
+        XCTAssertEqual(delegate.didFailWithErrorCallCounts, 1)
+        
         XCTAssertEqual(sut.users.count, 0)
     }
 
@@ -62,7 +71,6 @@ class UsersListViewModelTests: XCTestCase {
         let mockNetwork = MockNetworkService()
         let mockFollow = MockFollowManager()
         let user = User(user_id: 1, display_name: "Test", reputation: 100, profile_image: nil)
-        mockNetwork.result = .success([user])
         let sut = UsersListViewModel(networkService: mockNetwork, followManager: mockFollow)
         
         XCTAssertFalse(sut.isFollowing(user: user))
