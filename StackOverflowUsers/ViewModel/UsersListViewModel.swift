@@ -1,18 +1,14 @@
 import Foundation
 
-protocol UsersListViewModelDelegate: AnyObject {
-    func didUpdateUsers()
-    func didFailWithError(_ error: Error)
-}
-
 class UsersListViewModel {
     private let networkService: NetworkServiceProtocol
     private let followManager: FollowManagerProtocol
     private(set) var users: [User] = []
-    weak var delegate: UsersListViewModelDelegate?
     
     var isLoading: Bool = false
-    var error: Error?
+    
+    var onUsersUpdated: (() -> Void)?
+    var onError: ((Error) -> Void)?
     
     init(networkService: NetworkServiceProtocol,
          followManager: FollowManagerProtocol) {
@@ -23,15 +19,15 @@ class UsersListViewModel {
     func fetchUsers() {
         isLoading = true
         networkService.fetchTopUsers { [weak self] result in
-            self?.isLoading = false
+            guard let self = self else { return }
+            self.isLoading = false
             switch result {
             case .success(let users):
-                self?.users = users
-                self?.delegate?.didUpdateUsers()
+                self.users = users
+                self.onUsersUpdated?()
             case .failure(let error):
-                self?.error = error
-                self?.users = []
-                self?.delegate?.didFailWithError(error)
+                self.users = []
+                self.onError?(error)
             }
         }
     }
@@ -42,11 +38,11 @@ class UsersListViewModel {
     
     func follow(user: User) {
         followManager.follow(userId: user.user_id)
-        delegate?.didUpdateUsers()
+        onUsersUpdated?()
     }
     
     func unfollow(user: User) {
         followManager.unfollow(userId: user.user_id)
-        delegate?.didUpdateUsers()
+        onUsersUpdated?()
     }
 }

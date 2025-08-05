@@ -8,7 +8,7 @@ class UsersListViewController: UIViewController {
     init(viewModel: UsersListViewModel) {
         self.viewModel = viewModel
         super.init(nibName: nil, bundle: nil)
-        self.viewModel.delegate = self
+        setupViewModelCallbacks()
     }
     
     required init?(coder: NSCoder) {
@@ -19,6 +19,20 @@ class UsersListViewController: UIViewController {
         super.viewDidLoad()
         setupUI()
         viewModel.fetchUsers()
+    }
+    
+    private func setupViewModelCallbacks() {
+        viewModel.onUsersUpdated = { [weak self] in
+            DispatchQueue.main.async {
+                self?.hideError()
+                self?.tableView.reloadData()
+            }
+        }
+        viewModel.onError = { [weak self] error in
+            DispatchQueue.main.async {
+                self?.showError("Failed to load users. Please try again.")
+            }
+        }
     }
     
     private func setupUI() {
@@ -78,20 +92,5 @@ extension UsersListViewController: UITableViewDataSource, UITableViewDelegate {
             }
         }
         return cell
-    }
-}
-
-extension UsersListViewController: UsersListViewModelDelegate {
-    func didUpdateUsers() {
-        DispatchQueue.main.async { [weak self] in
-            self?.hideError()
-            self?.tableView.reloadData()
-        }
-    }
-    
-    func didFailWithError(_ error: Error) {
-        DispatchQueue.main.async { [weak self] in
-            self?.showError("Failed to load users. Please try again.")
-        }
     }
 }
