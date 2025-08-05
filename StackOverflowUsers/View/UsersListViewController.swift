@@ -1,14 +1,17 @@
 import UIKit
+import Combine
 
 class UsersListViewController: UIViewController {
     private let viewModel: UsersListViewModel
+    private let combineAdapter: UsersListViewModelCombineAdapter
+    private var cancellables = Set<AnyCancellable>()
     private let tableView = UITableView()
     private let errorLabel = UILabel()
     
     init(viewModel: UsersListViewModel) {
         self.viewModel = viewModel
+        self.combineAdapter = UsersListViewModelCombineAdapter(viewModel: viewModel)
         super.init(nibName: nil, bundle: nil)
-        setupViewModelCallbacks()
     }
     
     required init?(coder: NSCoder) {
@@ -18,21 +21,26 @@ class UsersListViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         setupUI()
+        bindViewModel()
         viewModel.fetchUsers()
     }
     
-    private func setupViewModelCallbacks() {
-        viewModel.onUsersUpdated = { [weak self] in
-            DispatchQueue.main.async {
+    private func bindViewModel() {
+        combineAdapter.usersPublisher
+            .receive(on: RunLoop.main)
+            .sink { [weak self] _ in
                 self?.hideError()
                 self?.tableView.reloadData()
             }
-        }
-        viewModel.onError = { [weak self] error in
-            DispatchQueue.main.async {
-                self?.showError("Failed to load users. Please try again.")
+            .store(in: &cancellables)
+        
+        combineAdapter.errorPublisher
+            .compactMap { $0 }
+            .receive(on: RunLoop.main)
+            .sink { [weak self] error in
+                self?.showError(error.localizedDescription)
             }
-        }
+            .store(in: &cancellables)
     }
     
     private func setupUI() {
