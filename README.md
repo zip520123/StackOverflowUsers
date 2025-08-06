@@ -10,6 +10,8 @@ This iOS app displays the top 20 StackOverflow users, showing their profile imag
 - Followed users are indicated in the list.
 - Error state UI if the network request fails.
 - Fully unit tested (models, networking, view model, follow manager).
+- **Memory leak checking in unit tests.**
+- **Reactive programming with Combine for UI binding.**
 
 ## Architecture
 - **Model:** Data structures for users and API responses.
@@ -24,7 +26,8 @@ This iOS app displays the top 20 StackOverflow users, showing their profile imag
 - **No 3rd Party Libraries:** All networking, persistence, and UI are implemented using native Swift and UIKit APIs.
 - **Persistence:** Followed user IDs are stored in UserDefaults for simplicity and reliability.
 - **Async Image Loading:** Profile images are loaded asynchronously with cell reuse safety.
-- **Unit Testing:** All business logic and networking are covered by unit tests using dependency injection and mocks.
+- **Unit Testing:** All business logic and networking are covered by unit tests using dependency injection and mocks. Memory leaks are checked in tests.
+- **Reactive Programming:** UI state is bound using Combine via an adapter, keeping the ViewModel decoupled from Combine.
 
 ## Installation
 1. Clone the repository:
